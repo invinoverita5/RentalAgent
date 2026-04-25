@@ -34,9 +34,6 @@
         "required_status_checks": [
           {
             "context": "CodeRabbit"
-          },
-          {
-            "context": "pr-review-gate"
           }
         ]
       }

@@ -19,6 +19,10 @@ This repository requires a review gate for every implementation PR created by Co
 8. If repository auto-merge is enabled, Codex may enable auto-merge after local checks pass, CodeRabbit raises no unresolved critical or major issues, and the PR review gate passes.
 9. If repository auto-merge is unavailable, Codex may merge its own PR only after the same checks pass and the user has opted into this auto-merge workflow.
 
+## Review Gate Rollout
+
+The initial branch ruleset requires the `CodeRabbit` status check only. Add `pr-review-gate` as a required status check after `docs/pr-review-gate-workflow.yml` has been copied to `.github/workflows/pr-review-gate.yml` and has produced a successful check at least once.
+
 ## Auto-Merge Preconditions
 
 Codex-authored PRs are eligible for auto-merge only when all of these are true:
