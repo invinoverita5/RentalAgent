@@ -10,7 +10,7 @@ This repository requires a review gate for every implementation PR created by Co
 4. Run CodeRabbit before asking for merge:
 
    ```bash
-   coderabbit review --agent --base main -c AGENTS.md
+   coderabbit review --agent --base main
    ```
 
 5. Address all critical and major CodeRabbit issues before marking a PR ready.
