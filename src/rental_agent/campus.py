@@ -16,6 +16,19 @@ DEFAULT_CONTEXT_TYPES = {
     "housing_notes",
 }
 
+# Below this commute window, return only the strongest campus-proximity areas.
+SHORT_COMMUTE_FILTER_MAX_MINUTES = 25
+
+# Minimum student-area fit kept when a short commute preference is supplied.
+SHORT_COMMUTE_STUDENT_AREA_FIT_MINIMUM = 0.75
+
+
+def _normalize_query(value: str) -> str:
+    cleaned = value.lower().replace("&", " and ")
+    return " ".join(
+        "".join(character if character.isalnum() else " " for character in cleaned).split()
+    )
+
 
 @dataclass(frozen=True)
 class CampusRecord:
@@ -266,6 +279,13 @@ UNSUPPORTED_PHILADELPHIA_SCHOOLS = {
     "haverford college",
 }
 
+NORMALIZED_ALIAS_TO_CAMPUSES: dict[str, tuple[CampusRecord, ...]] = {}
+for campus in CAMPUS_RECORDS:
+    for alias in campus.aliases:
+        normalized_alias = _normalize_query(alias)
+        existing = NORMALIZED_ALIAS_TO_CAMPUSES.get(normalized_alias, ())
+        NORMALIZED_ALIAS_TO_CAMPUSES[normalized_alias] = existing + (campus,)
+
 
 def get_campus_context(
     university_name: str,
@@ -347,11 +367,7 @@ def _match_campuses(normalized_query: str) -> list[CampusRecord]:
 
 
 def _exact_matches(normalized_query: str) -> list[CampusRecord]:
-    return [
-        campus
-        for campus in CAMPUS_RECORDS
-        if normalized_query in {_normalize_query(alias) for alias in campus.aliases}
-    ]
+    return list(NORMALIZED_ALIAS_TO_CAMPUSES.get(normalized_query, ()))
 
 
 def _fuzzy_matches(normalized_query: str) -> list[CampusRecord]:
@@ -457,9 +473,16 @@ def _filter_student_areas(
     student_areas: tuple[dict[str, Any], ...],
     max_commute_minutes: float | None,
 ) -> tuple[dict[str, Any], ...]:
-    if max_commute_minutes is None or max_commute_minutes >= 25:
+    if (
+        max_commute_minutes is None
+        or max_commute_minutes >= SHORT_COMMUTE_FILTER_MAX_MINUTES
+    ):
         return student_areas
-    return tuple(area for area in student_areas if area["student_area_fit"] >= 0.75)
+    return tuple(
+        area
+        for area in student_areas
+        if area["student_area_fit"] >= SHORT_COMMUTE_STUDENT_AREA_FIT_MINIMUM
+    )
 
 
 def _is_supported_later(normalized_query: str) -> bool:
@@ -472,10 +495,3 @@ def _match_score(left: str, right: str) -> float:
     if left in right or right in left:
         return 0.9
     return SequenceMatcher(None, left, right).ratio()
-
-
-def _normalize_query(value: str) -> str:
-    cleaned = value.lower().replace("&", " and ")
-    return " ".join(
-        "".join(character if character.isalnum() else " " for character in cleaned).split()
-    )
