@@ -1,6 +1,13 @@
 """Student Rental Agent prototype runtime."""
 
 from rental_agent.campus import get_campus_context
+from rental_agent.sources import (
+    SOURCE_REGISTRY,
+    SourcePolicy,
+    SourceRecord,
+    get_source_registry,
+    select_sources_for_retrieval,
+)
 from rental_agent.state import (
     DEFAULT_STORE,
     SessionStateStore,
@@ -10,8 +17,13 @@ from rental_agent.state import (
 
 __all__ = [
     "DEFAULT_STORE",
+    "SOURCE_REGISTRY",
     "SessionStateStore",
+    "SourcePolicy",
+    "SourceRecord",
     "delete_user_state",
     "get_campus_context",
+    "get_source_registry",
+    "select_sources_for_retrieval",
     "update_user_state",
 ]
