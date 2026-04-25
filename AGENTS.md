@@ -31,6 +31,15 @@ Codex-authored PRs are eligible for auto-merge only when all of these are true:
 - The PR body satisfies the repository PR review gate.
 - GitHub branch rules allow the merge.
 
+### Required PR checklist text
+
+The PR review gate expects these literal checked lines in the PR body:
+
+- `[x] CodeRabbit review was run.`
+- `[x] Critical and major CodeRabbit issues are fixed.`
+- `[x] Any unresolved CodeRabbit issues are documented below with rationale.`
+- `[x] No new fallback path allows the agent to invent listings, rankings, commute times, prices, or safety claims.`
+
 Do not auto-merge if CodeRabbit fails, times out, cannot authenticate, or returns an unresolved critical or major issue.
 
 ## Source Of Truth
