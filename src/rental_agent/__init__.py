@@ -1,6 +1,7 @@
 """Student Rental Agent prototype runtime."""
 
 from rental_agent.campus import get_campus_context
+from rental_agent.comparison import compare_listings
 from rental_agent.enrichment import enrich_listings
 from rental_agent.ranking import rank_listings
 from rental_agent.retrieval import (
@@ -33,6 +34,7 @@ __all__ = [
     "SessionStateStore",
     "SourcePolicy",
     "SourceRecord",
+    "compare_listings",
     "delete_listing_snapshots",
     "delete_user_state",
     "enrich_listings",
