@@ -4,6 +4,12 @@ from rental_agent.campus import get_campus_context
 from rental_agent.comparison import compare_listings
 from rental_agent.enrichment import enrich_listings
 from rental_agent.ranking import rank_listings
+from rental_agent.renderer import (
+    render_comparison,
+    render_initial_setup,
+    render_no_results,
+    render_ranked_shortlist,
+)
 from rental_agent.retrieval import (
     DEFAULT_LISTING_STORE,
     ListingSnapshot,
@@ -41,6 +47,10 @@ __all__ = [
     "get_campus_context",
     "get_source_registry",
     "rank_listings",
+    "render_comparison",
+    "render_initial_setup",
+    "render_no_results",
+    "render_ranked_shortlist",
     "retrieve_listings",
     "select_sources_for_retrieval",
     "update_user_state",
