@@ -1,6 +1,7 @@
 """Student Rental Agent prototype runtime."""
 
 from rental_agent.campus import get_campus_context
+from rental_agent.enrichment import enrich_listings
 from rental_agent.retrieval import (
     DEFAULT_LISTING_STORE,
     ListingSnapshot,
@@ -33,6 +34,7 @@ __all__ = [
     "SourceRecord",
     "delete_listing_snapshots",
     "delete_user_state",
+    "enrich_listings",
     "get_campus_context",
     "get_source_registry",
     "retrieve_listings",
