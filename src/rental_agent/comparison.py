@@ -157,8 +157,10 @@ def _cost_claim(listing: dict[str, Any]) -> dict[str, Any]:
     rent = _optional_number(listing.get("rent_per_person_monthly"))
     if all_in is not None:
         claim = f"All-in estimate is about ${all_in:g}/person per month."
-    else:
+    elif rent is not None:
         claim = f"Rent is about ${rent:g}/person per month; all-in cost is incomplete."
+    else:
+        claim = "Rent and all-in cost are incomplete."
     return _tool_fact("cost", claim, listing)
 
 
