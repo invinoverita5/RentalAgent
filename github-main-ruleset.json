@@ -1,7 +1,6 @@
 {
   "name": "Protect main",
   "target": "branch",
-  "source_type": "Repository",
   "enforcement": "active",
   "conditions": {
     "ref_name": {
@@ -28,6 +27,5 @@
         "required_review_thread_resolution": false
       }
     }
-  ],
-  "bypass_actors": []
+  ]
 }
