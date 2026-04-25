@@ -72,26 +72,47 @@ class SourcePolicy:
     require_source_allowed_for_v1: bool = True
     avoid_sources: tuple[str, ...] = ()
 
+    def __post_init__(self) -> None:
+        invalid_types = set(self.allowed_source_types) - SOURCE_TYPES
+        if invalid_types:
+            invalid = ", ".join(sorted(invalid_types))
+            raise ValueError(f"unsupported allowed source type(s): {invalid}")
+        if not isinstance(self.non_login_public_only, bool):
+            raise ValueError("non_login_public_only must be a boolean")
+        if not isinstance(self.require_source_allowed_for_v1, bool):
+            raise ValueError("require_source_allowed_for_v1 must be a boolean")
+        if not all(isinstance(source_id, str) for source_id in self.avoid_sources):
+            raise ValueError("avoid_sources must contain only source IDs")
+
     @classmethod
     def from_mapping(cls, value: dict[str, Any] | None = None) -> "SourcePolicy":
         if value is None:
             return cls()
+        if not isinstance(value, dict):
+            raise ValueError("source policy must be a mapping")
 
-        allowed_source_types = tuple(
-            value.get("allowed_source_types", DEFAULT_ALLOWED_SOURCE_TYPES)
+        allowed_source_types = _string_sequence(
+            value.get("allowed_source_types", DEFAULT_ALLOWED_SOURCE_TYPES),
+            field_name="allowed_source_types",
         )
-        invalid_types = set(allowed_source_types) - SOURCE_TYPES
-        if invalid_types:
-            invalid = ", ".join(sorted(invalid_types))
-            raise ValueError(f"unsupported allowed source type(s): {invalid}")
+        non_login_public_only = _boolean_value(
+            value.get("non_login_public_only", True),
+            field_name="non_login_public_only",
+        )
+        require_source_allowed_for_v1 = _boolean_value(
+            value.get("require_source_allowed_for_v1", True),
+            field_name="require_source_allowed_for_v1",
+        )
+        avoid_sources = _string_sequence(
+            value.get("avoid_sources", ()),
+            field_name="avoid_sources",
+        )
 
         return cls(
             allowed_source_types=allowed_source_types,
-            non_login_public_only=bool(value.get("non_login_public_only", True)),
-            require_source_allowed_for_v1=bool(
-                value.get("require_source_allowed_for_v1", True)
-            ),
-            avoid_sources=tuple(value.get("avoid_sources", ())),
+            non_login_public_only=non_login_public_only,
+            require_source_allowed_for_v1=require_source_allowed_for_v1,
+            avoid_sources=avoid_sources,
         )
 
 
@@ -301,8 +322,22 @@ def _skip_reason(record: SourceRecord, policy: SourcePolicy) -> str | None:
     return None
 
 
+def _string_sequence(value: Any, *, field_name: str) -> tuple[str, ...]:
+    if isinstance(value, str) or not isinstance(value, list | tuple | set):
+        raise ValueError(f"{field_name} must be a sequence of strings")
+    if not all(isinstance(item, str) for item in value):
+        raise ValueError(f"{field_name} must contain only strings")
+    return tuple(value)
+
+
+def _boolean_value(value: Any, *, field_name: str) -> bool:
+    if not isinstance(value, bool):
+        raise ValueError(f"{field_name} must be a boolean")
+    return value
+
+
 def _utc_now(now: datetime | None = None) -> str:
     value = now or datetime.now(UTC)
     if value.tzinfo is None:
-        value = value.replace(tzinfo=UTC)
+        raise ValueError("now must be timezone-aware")
     return value.astimezone(UTC).isoformat().replace("+00:00", "Z")

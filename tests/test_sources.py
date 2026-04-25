@@ -108,6 +108,26 @@ class SourceRegistryTests(unittest.TestCase):
             "source requires login or private access",
         )
 
+    def test_blocked_adapter_skip_reason_is_reported(self):
+        result = select_sources_for_retrieval(
+            "campus_temple_main",
+            {
+                "allowed_source_types": ["student_housing_portal"],
+                "non_login_public_only": False,
+                "require_source_allowed_for_v1": False,
+            },
+            now=self.now,
+        )
+
+        skipped_by_id = {
+            skipped["source"]["source_id"]: skipped["reason"]
+            for skipped in result["skipped_sources"]
+        }
+        self.assertEqual(
+            skipped_by_id["facebook_student_sublets"],
+            "adapter_status is blocked",
+        )
+
     def test_unknown_campus_returns_source_error_separate_from_empty_results(self):
         result = select_sources_for_retrieval("campus_unknown", now=self.now)
 
@@ -130,6 +150,32 @@ class SourceRegistryTests(unittest.TestCase):
                 "campus_drexel_university_city",
                 {"allowed_source_types": ["facebook_group"]},
                 now=self.now,
+            )
+
+    def test_invalid_policy_field_types_raise(self):
+        invalid_policies = (
+            {"allowed_source_types": "official_university_portal"},
+            {"allowed_source_types": ["official_university_portal", 7]},
+            {"non_login_public_only": "false"},
+            {"require_source_allowed_for_v1": "true"},
+            {"avoid_sources": "zillow"},
+            {"avoid_sources": ["zillow", 7]},
+        )
+
+        for policy in invalid_policies:
+            with self.subTest(policy=policy):
+                with self.assertRaisesRegex(ValueError, "must"):
+                    select_sources_for_retrieval(
+                        "campus_drexel_university_city",
+                        policy,
+                        now=self.now,
+                    )
+
+    def test_naive_datetime_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "timezone-aware"):
+            select_sources_for_retrieval(
+                "campus_drexel_university_city",
+                now=datetime(2026, 4, 25, 12, 0),
             )
 
 
