@@ -15,7 +15,23 @@ This repository requires a review gate for every implementation PR created by Co
 
 5. Address all critical and major CodeRabbit issues before marking a PR ready.
 6. Summarize remaining minor issues or accepted risks in the PR.
-7. Do not merge Codex-authored PRs automatically. The user or repository owner merges after review.
+7. Fill in the PR template's validation and CodeRabbit findings sections.
+8. If repository auto-merge is enabled, Codex may enable auto-merge after local checks pass, CodeRabbit raises no unresolved critical or major issues, and the PR review gate passes.
+9. If repository auto-merge is unavailable, Codex may merge its own PR only after the same checks pass and the user has opted into this auto-merge workflow.
+
+## Auto-Merge Preconditions
+
+Codex-authored PRs are eligible for auto-merge only when all of these are true:
+
+- The PR is not a draft.
+- Relevant local tests or checks passed.
+- `coderabbit review --agent --base main` completed successfully.
+- All critical and major CodeRabbit issues are fixed.
+- Any unresolved minor issues are documented in the PR body.
+- The PR body satisfies the repository PR review gate.
+- GitHub branch rules allow the merge.
+
+Do not auto-merge if CodeRabbit fails, times out, cannot authenticate, or returns an unresolved critical or major issue.
 
 ## Source Of Truth
 
