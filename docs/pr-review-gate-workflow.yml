@@ -1,0 +1,51 @@
+name: PR Review Gate
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - ready_for_review
+      - reopened
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  pr-review-gate:
+    name: pr-review-gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify review checklist
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
+        with:
+          script: |
+            const body = context.payload.pull_request.body || "";
+            const checks = [
+              {
+                label: "CodeRabbit review was run",
+                pattern: /-\s*\[[xX]\]\s*CodeRabbit review was run\./
+              },
+              {
+                label: "Critical and major CodeRabbit issues are fixed",
+                pattern: /-\s*\[[xX]\]\s*Critical and major CodeRabbit issues are fixed\./
+              },
+              {
+                label: "Unresolved CodeRabbit issues are documented",
+                pattern: /-\s*\[[xX]\]\s*Any unresolved CodeRabbit issues are documented below with rationale\./
+              },
+              {
+                label: "No listing-fact fallback bypass is introduced",
+                pattern: /-\s*\[[xX]\]\s*No new fallback path allows the agent to invent listings, rankings, commute times, prices, or safety claims\./
+              }
+            ];
+
+            const missing = checks
+              .filter((check) => !check.pattern.test(body))
+              .map((check) => check.label);
+
+            if (missing.length > 0) {
+              core.setFailed(`PR review gate incomplete: ${missing.join(", ")}`);
+            }
